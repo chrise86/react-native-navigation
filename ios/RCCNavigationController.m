@@ -10,6 +10,12 @@
 #import "UIViewController+Rotation.h"
 #import "RCTHelpers.h"
 
+@interface RCCNavigationController()
+
+@property (strong, nonatomic) RCTRootView *overlayView;
+
+@end
+
 @implementation RCCNavigationController
 {
   BOOL _transitioning;
