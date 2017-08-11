@@ -630,6 +630,14 @@ function savePassProps(params) {
   }
 }
 
+function showOverlay(params) {
+  ScreenUtils.showOverlay(params)
+}
+
+function removeOverlay() {
+  ScreenUtils.removeOverlay()
+}
+
 function showContextualMenu() {
   // Android only
 }
@@ -670,5 +678,7 @@ export default {
   navigatorToggleNavBar,
   showContextualMenu,
   dismissContextualMenu,
-  getCurrentlyVisibleScreenId
+  getCurrentlyVisibleScreenId,
+  showOverlay,
+  removeOverlay
 };
