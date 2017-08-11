@@ -68,6 +68,7 @@ function startTabBasedApp(params) {
         <TabBarControllerIOS
           id={controllerID + '_tabs'}
           style={params.tabsStyle}
+          overlay={params.overlay}
           appStyle={params.appStyle}>
           {
             params.tabs.map(function(tab, index) {
@@ -567,7 +568,7 @@ function showInAppNotification(params) {
     navigatorEventID,
     navigatorID
   };
-  
+
   savePassProps(params);
 
   let args = {
