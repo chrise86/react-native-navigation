@@ -68,6 +68,7 @@ function startTabBasedApp(params) {
         <TabBarControllerIOS
           id={controllerID + '_tabs'}
           style={params.tabsStyle}
+          overlay={params.overlay}
           appStyle={params.appStyle}>
           {
             params.tabs.map(function(tab, index) {
@@ -162,6 +163,7 @@ function startSingleScreenApp(params) {
           subtitle={params.subtitle}
           titleImage={screen.titleImage}
           component={screen.screen}
+          overlay={params.overlay}
           passProps={{
             navigatorID: navigatorID,
             screenInstanceID: screenInstanceID,
@@ -571,7 +573,7 @@ function showInAppNotification(params) {
     navigatorEventID,
     navigatorID
   };
-  
+
   savePassProps(params);
 
   let args = {
@@ -617,6 +619,14 @@ function savePassProps(params) {
   }
 }
 
+function showOverlay(params) {
+  ScreenUtils.showOverlay(params)
+}
+
+function removeOverlay() {
+  ScreenUtils.removeOverlay()
+}
+
 function showContextualMenu() {
   // Android only
 }
@@ -658,5 +668,7 @@ export default {
   navigatorToggleNavBar,
   showContextualMenu,
   dismissContextualMenu,
-  getCurrentlyVisibleScreenId
+  getCurrentlyVisibleScreenId,
+  showOverlay,
+  removeOverlay
 };
