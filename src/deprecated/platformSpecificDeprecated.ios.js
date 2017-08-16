@@ -69,7 +69,8 @@ function startTabBasedApp(params) {
           id={controllerID + '_tabs'}
           style={params.tabsStyle}
           overlay={params.overlay}
-          appStyle={params.appStyle}>
+          appStyle={params.appStyle}
+          initialTabIndex={params.initialTabIndex}>
           {
             params.tabs.map(function(tab, index) {
               return (
