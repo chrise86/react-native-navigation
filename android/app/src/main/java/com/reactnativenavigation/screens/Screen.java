@@ -1,5 +1,6 @@
 package com.reactnativenavigation.screens;
 
+import android.animation.LayoutTransition;
 import android.annotation.TargetApi;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -115,6 +116,10 @@ public abstract class Screen extends RelativeLayout implements Subscriber {
         }
     }
 
+    public void updateBottomTabsVisibility(boolean hidden) {
+        styleParams.bottomTabsHidden = hidden;
+    }
+
     private void createViews() {
         createAndAddTopBar();
         createTitleBar();
@@ -135,7 +140,7 @@ public abstract class Screen extends RelativeLayout implements Subscriber {
             topBar.setReactView(screenParams.styleParams);
         } else {
             topBar.setTitle(screenParams.title, styleParams);
-            topBar.setSubtitle(screenParams.subtitle);
+            topBar.setSubtitle(screenParams.subtitle, styleParams);
         }
     }
 
@@ -235,6 +240,12 @@ public abstract class Screen extends RelativeLayout implements Subscriber {
 
     public void setTopBarVisible(boolean visible, boolean animate) {
         screenParams.styleParams.titleBarHidden = !visible;
+        if (animate && styleParams.drawScreenBelowTopBar) {
+            setLayoutTransition(new LayoutTransition());
+            getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+        } else {
+            setLayoutTransition(null);
+        }
         topBar.setVisible(visible, animate);
     }
 
@@ -243,7 +254,7 @@ public abstract class Screen extends RelativeLayout implements Subscriber {
     }
 
     public void setTitleBarSubtitle(String subtitle) {
-        topBar.setSubtitle(subtitle);
+        topBar.setSubtitle(subtitle, styleParams);
     }
 
     public void setTitleBarRightButtons(String navigatorEventId, List<TitleBarButtonParams> titleBarButtons) {

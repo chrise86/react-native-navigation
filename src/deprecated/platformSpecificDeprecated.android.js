@@ -35,6 +35,10 @@ function startSingleScreenApp(params) {
   params.overrideBackPress = screen.overrideBackPress;
   params.animateShow = convertAnimationType(params.animationType);
 
+  if (params.overlay) {
+    params.overlay = createOverlay(params.overlay)
+  }
+
   newPlatformSpecific.startApp(params);
 }
 
@@ -162,7 +166,10 @@ function convertStyleParams(originalStyleObject) {
     titleBarHideOnScroll: originalStyleObject.navBarHideOnScroll,
     titleBarTitleColor: processColor(originalStyleObject.navBarTextColor),
     titleBarSubtitleColor: processColor(originalStyleObject.navBarSubtitleColor),
+    titleBarSubtitleFontSize: originalStyleObject.navBarSubtitleFontSize,
+    titleBarSubtitleFontFamily: originalStyleObject.navBarSubtitleFontFamily,
     titleBarButtonColor: processColor(originalStyleObject.navBarButtonColor),
+    titleBarButtonFontFamily: originalStyleObject.navBarButtonFontFamily,
     titleBarDisabledButtonColor: processColor(originalStyleObject.titleBarDisabledButtonColor),
     titleBarTitleFontFamily: originalStyleObject.navBarTextFontFamily,
     titleBarTitleFontSize: originalStyleObject.navBarTextFontSize,
@@ -221,6 +228,19 @@ function convertStyleParams(originalStyleObject) {
     ret.expendCollapsingToolBarOnTopTabChange = true;
   }
   return ret;
+}
+
+function createOverlay(overlayParams) {
+  if (!overlayParams.screen) {
+    console.error('createOverlay(overlayParams): overlay must include a screen property');
+    return;
+  }
+
+  let result = Object.assign({}, overlayParams);
+  result.screenId = result.screen;
+  addNavigatorParams(result);
+  result = adaptNavigationParams(result);
+  return result
 }
 
 function convertDrawerParamsToSideMenuParams(drawerParams) {
@@ -711,6 +731,13 @@ function dismissContextualMenu() {
   newPlatformSpecific.dismissContextualMenu();
 }
 
+function showOverlay(params) {
+}
+
+function removeOverlay() {
+}
+
+
 async function isAppLaunched() {
   return await newPlatformSpecific.isAppLaunched();
 }
@@ -755,5 +782,7 @@ export default {
   dismissContextualMenu,
   isAppLaunched,
   isRootLaunched,
-  getCurrentlyVisibleScreenId
+  getCurrentlyVisibleScreenId,
+  showOverlay,
+  removeOverlay
 };
