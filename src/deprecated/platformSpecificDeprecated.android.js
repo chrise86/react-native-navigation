@@ -2,6 +2,7 @@
 import React, {Component} from 'react';
 import ReactNative, {AppRegistry, NativeModules, processColor} from 'react-native';
 import _ from 'lodash';
+import PropRegistry from './../PropRegistry';
 
 import Navigation from './../Navigation';
 
@@ -9,7 +10,7 @@ const resolveAssetSource = require('react-native/Libraries/Image/resolveAssetSou
 
 import * as newPlatformSpecific from './../platformSpecific';
 
-function startSingleScreenApp(params) {
+async function startSingleScreenApp(params) {
   const screen = params.screen;
   if (!screen.screen) {
     console.error('startSingleScreenApp(params): screen must include a screen property');
@@ -39,7 +40,7 @@ function startSingleScreenApp(params) {
     params.overlay = createOverlay(params.overlay)
   }
 
-  newPlatformSpecific.startApp(params);
+  return await newPlatformSpecific.startApp(params);
 }
 
 function getOrientation(params) {
@@ -83,8 +84,14 @@ function navigatorPush(navigator, params) {
   adapted = adaptNavigationParams(adapted);
   adapted.overrideBackPress = params.overrideBackPress;
   adapted.timestamp = Date.now();
+  if (!adapted.passProps) {
+    adapted.passProps = {};
+  }
+  if (!adapted.passProps.commandType) {
+    adapted.passProps.commandType = 'Push';
+  }
 
-  newPlatformSpecific.push(adapted);
+  return newPlatformSpecific.push(adapted);
 }
 
 function navigatorPop(navigator, params) {
@@ -146,6 +153,7 @@ function convertStyleParams(originalStyleObject) {
     statusBarColor: processColor(originalStyleObject.statusBarColor),
     statusBarHidden: originalStyleObject.statusBarHidden,
     statusBarTextColorScheme: originalStyleObject.statusBarTextColorScheme,
+    drawUnderStatusBar: originalStyleObject.drawUnderStatusBar || false,
     topBarReactView: originalStyleObject.navBarCustomView,
     topBarReactViewAlignment: originalStyleObject.navBarComponentAlignment,
     topBarReactViewInitialProps: originalStyleObject.navBarCustomViewInitialProps,
@@ -177,6 +185,7 @@ function convertStyleParams(originalStyleObject) {
     titleBarTitleFontBold: originalStyleObject.navBarTextFontBold,
     titleBarTitleTextCentered: originalStyleObject.navBarTitleTextCentered,
     titleBarHeight: originalStyleObject.navBarHeight,
+    titleBarTopPadding: originalStyleObject.navBarTopPadding,
     backButtonHidden: originalStyleObject.backButtonHidden,
     topTabsHidden: originalStyleObject.topTabsHidden,
     contextualMenuStatusBarColor: processColor(originalStyleObject.contextualMenuStatusBarColor),
@@ -186,6 +195,7 @@ function convertStyleParams(originalStyleObject) {
     drawBelowTopBar: !originalStyleObject.drawUnderNavBar,
 
     topTabTextColor: processColor(originalStyleObject.topTabTextColor),
+    topTabTextFontFamily: originalStyleObject.topTabTextFontFamily,
     topTabIconColor: processColor(originalStyleObject.topTabIconColor),
     selectedTopTabIconColor: processColor(originalStyleObject.selectedTopTabIconColor),
     selectedTopTabTextColor: processColor(originalStyleObject.selectedTopTabTextColor),
@@ -228,6 +238,11 @@ function convertStyleParams(originalStyleObject) {
   if (_.isUndefined(ret.expendCollapsingToolBarOnTopTabChange)) {
     ret.expendCollapsingToolBarOnTopTabChange = true;
   }
+  if (ret.topBarReactViewInitialProps) {
+    const passPropsKey = _.uniqueId('customNavBarComponent');
+    PropRegistry.save(passPropsKey, ret.topBarReactViewInitialProps);
+    ret.topBarReactViewInitialProps = {passPropsKey};
+  }
   return ret;
 }
 
@@ -258,7 +273,12 @@ function convertDrawerParamsToSideMenuParams(drawerParams) {
       addNavigatorParams(result[key]);
       result[key] = adaptNavigationParams(result[key]);
       result[key].passProps = drawer[key].passProps;
-      result[key].disableOpenGesture = drawer.disableOpenGesture;
+      if (drawer.disableOpenGesture) {
+        result[key].disableOpenGesture = drawer.disableOpenGesture;
+      } else {
+        result[key].disableOpenGesture = drawer[key].disableOpenGesture;
+      }
+
     } else {
       result[key] = null;
     }
@@ -276,7 +296,7 @@ function adaptNavigationParams(screen) {
   return screen;
 }
 
-function startTabBasedApp(params) {
+async function startTabBasedApp(params) {
   if (!params.tabs) {
     console.error('startTabBasedApp(params): params.tabs is required');
     return;
@@ -314,7 +334,7 @@ function startTabBasedApp(params) {
   params.sideMenu = convertDrawerParamsToSideMenuParams(params.drawer);
   params.animateShow = convertAnimationType(params.animationType);
 
-  newPlatformSpecific.startApp(params);
+  return await newPlatformSpecific.startApp(params);
 }
 
 function addTabIcon(tab) {
@@ -347,6 +367,11 @@ function navigatorSetButtons(navigator, navigatorEventID, _params) {
       }
       if (button.buttonColor) {
         button.color = processColor(button.buttonColor);
+      }
+      if (button.component) {
+        const passPropsKey = _.uniqueId('customButtonComponent');
+        PropRegistry.save(passPropsKey, button.passProps);
+        button.passProps = {passPropsKey};
       }
     });
   }
@@ -473,6 +498,12 @@ function showModal(params) {
   adapted = adaptNavigationParams(adapted);
   adapted.overrideBackPress = params.overrideBackPress;
   adapted.timestamp = Date.now();
+  if (!adapted.passProps) {
+    adapted.passProps = {};
+  }
+  if (!adapted.passProps.commandType) {
+    adapted.passProps.commandType = 'ShowModal';
+  }
 
   newPlatformSpecific.showModal(adapted);
 }
@@ -552,6 +583,11 @@ function addNavigatorButtons(screen, sideMenuParams) {
       if (button.buttonColor) {
         button.color = processColor(button.buttonColor);
       }
+      if (button.component) {
+        const passPropsKey = _.uniqueId('customButtonComponent');
+        PropRegistry.save(passPropsKey, button.passProps);
+        button.passProps = {passPropsKey};
+      }
     });
   }
 
@@ -607,12 +643,21 @@ function getFab(screen) {
   if (fab.backgroundColor) {
     fab.backgroundColor = processColor(fab.backgroundColor);
   }
+  if (fab.collapsedIconColor) {
+    fab.collapsedIconColor = processColor(fab.collapsedIconColor);
+  }
+  if (fab.expendedIconColor) {
+    fab.expendedIconColor = processColor(fab.expendedIconColor);
+  }
 
   if (fab.actions) {
     _.forEach(fab.actions, (action) => {
       action.icon = resolveAssetSource(action.icon).uri;
       if (action.backgroundColor) {
         action.backgroundColor = processColor(action.backgroundColor)
+      }
+      if (action.iconColor) {
+        action.iconColor = processColor(action.iconColor)
       }
       return action;
     });
