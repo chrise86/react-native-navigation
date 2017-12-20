@@ -88,8 +88,8 @@ function startTabBasedApp(params) {
           style={params.tabsStyle}
           overlay={params.overlay}
           appStyle={params.appStyle}
-          initialTabIndex={params.initialTabIndex}>
-          overlay={params.overlay}
+          initialTabIndex={params.initialTabIndex}
+          overlay={params.overlay}>
           {
             params.tabs.map(function(tab, index) {
               return (
