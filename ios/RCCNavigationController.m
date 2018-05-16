@@ -400,30 +400,24 @@ NSString const *CALLBACK_ASSOCIATED_ID = @"RCCNavigationController.CALLBACK_ASSO
 }
 
 - (void)setOverlayView:(RCTRootView *)overlayView {
-  RCTRootView *previousOverlayView = _overlayView;
+  RCTRootView *previousOverlayView = overlayView;
 
   if (previousOverlayView) {
     [previousOverlayView removeFromSuperview];
   }
 
-  _overlayView = overlayView;
-
-  if (!_overlayView) {
+  if (!overlayView) {
     return;
   }
 
-  _overlayView.passThroughTouches = YES;
-  _overlayView.backgroundColor = [UIColor clearColor];
-  _overlayView.frame = self.view.bounds;
-  [self.view addSubview:_overlayView];
+  overlayView.passThroughTouches = YES;
+  overlayView.backgroundColor = [UIColor clearColor];
+  overlayView.frame = self.view.bounds;
+  [self.view addSubview:overlayView];
 }
 
 - (void)viewDidLayoutSubviews {
   [super viewDidLayoutSubviews];
-
-  if (_overlayView) {
-    [self.view bringSubviewToFront:_overlayView];
-  }
 }
 
 - (UIViewController *)viewControllerWithComponent:(NSString *)component
