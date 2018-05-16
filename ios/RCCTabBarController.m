@@ -134,7 +134,7 @@
     NSString *overlayScreen = [props valueForKeyPath:@"overlay.screen"];
     if (overlayScreen) {
         // Pass navigation props
-        NSMutableDictionary *mutablePassPropsOverlay = [passProps mutableCopy];
+        NSMutableDictionary *mutablePassPropsOverlay = [props mutableCopy];
         NSDictionary *overlayProps = [props valueForKeyPath:@"overlay.passProps"];
         if (overlayProps) {
         [mutablePassPropsOverlay addEntriesFromDictionary:overlayProps];
