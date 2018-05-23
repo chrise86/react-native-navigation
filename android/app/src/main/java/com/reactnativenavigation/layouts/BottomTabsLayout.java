@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
+// import android.app.Activity;
+import android.widget.FrameLayout;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.facebook.react.bridge.Arguments;
@@ -36,6 +38,7 @@ import com.reactnativenavigation.screens.ScreenStack;
 import com.reactnativenavigation.utils.Task;
 import com.reactnativenavigation.utils.ViewUtils;
 import com.reactnativenavigation.views.BottomTabs;
+import com.reactnativenavigation.views.ContentOverlayView;
 import com.reactnativenavigation.views.LightBox;
 import com.reactnativenavigation.views.SideMenu;
 import com.reactnativenavigation.views.SideMenu.Side;
@@ -55,6 +58,8 @@ public class BottomTabsLayout extends BaseLayout implements AHBottomNavigation.O
     private SnackbarAndFabContainer snackbarAndFabContainer;
     private BottomTabs bottomTabs;
     private ScreenStack[] screenStacks;
+    private ContentOverlayView overlayView;
+    protected final ScreenParams overlayParams;
     private final SideMenuParams leftSideMenuParams;
     private final SideMenuParams rightSideMenuParams;
     private final SlidingOverlaysQueue slidingOverlaysQueue = new SlidingOverlaysQueue();
@@ -67,6 +72,7 @@ public class BottomTabsLayout extends BaseLayout implements AHBottomNavigation.O
     public BottomTabsLayout(AppCompatActivity activity, ActivityParams params) {
         super(activity);
         this.params = params;
+        this.overlayParams = params.overlayParams;
         leftSideMenuParams = params.leftSideMenuParams;
         rightSideMenuParams = params.rightSideMenuParams;
         screenStacks = new ScreenStack[params.tabParams.size()];
@@ -79,8 +85,20 @@ public class BottomTabsLayout extends BaseLayout implements AHBottomNavigation.O
         addBottomTabs();
         addScreenStacks();
         createSnackbarContainer();
+        createOverlay();
         showInitialScreenStack();
         setInitialTabIndex();
+    }
+
+    private void createOverlay() {
+        if (overlayParams != null) {
+            overlayView = new ContentOverlayView(getActivity(), overlayParams.screenId, overlayParams.navigationParams);
+            RelativeLayout.LayoutParams lp = new LayoutParams(MATCH_PARENT, MATCH_PARENT);
+            RelativeLayout parentLayout = getScreenStackParent();
+            overlayView.setElevation(getElevation());
+            parentLayout.addView(overlayView, lp);
+            parentLayout.bringChildToFront(overlayView);
+        }
     }
 
     private void setInitialTabIndex() {
@@ -493,6 +511,12 @@ public class BottomTabsLayout extends BaseLayout implements AHBottomNavigation.O
 
         final int unselectedTabIndex = currentStackIndex;
         sendTabSelectedEventToJs(position, unselectedTabIndex);
+
+        // HACK: to fix center button being an action button
+        if (position == 2) {
+            return false;
+        }
+
         switchTab(position, NavigationType.BottomTabSelected);
         return true;
     }
